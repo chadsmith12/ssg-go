@@ -64,3 +64,27 @@ func (t *TextNode) Equals(other *TextNode) bool {
 func (t *TextNode) String() string {
 	return fmt.Sprintf("TextNode(%s, %s, %s)", t.Text, t.TextType, t.Url)
 }
+
+func (t *TextNode) HtmlNode() *HtmlNode {
+	switch t.TextType {
+	case TT_TEXT:
+		return LeafHtmlNode("", t.Text)
+	case TT_BOLD:
+		return LeafHtmlNode("b", t.Text)
+	case TT_CODE:
+		return LeafHtmlNode("pre", t.Text)
+	case TT_IMAGE:
+		return CreateHtmlNode("img", "", nil, map[string]string{
+			"src": t.Url,
+			"alt": t.Text,
+		})
+	case TT_ITALIC:
+		return LeafHtmlNode("i", t.Text)
+	case TT_LINK:
+		return CreateHtmlNode("a", t.Text, nil, map[string]string{
+			"href": t.Url,
+		})
+	default:
+		return LeafHtmlNode("", t.Text)
+	}
+}

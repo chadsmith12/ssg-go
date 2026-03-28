@@ -90,4 +90,26 @@ func TestHtmlString(t *testing.T) {
 			t.Errorf("expected %q, got %q", expected, got)
 		}
 	})
+
+	t.Run("can render html nodes with grand children", func(t *testing.T) {
+		bNode := ssg.LeafHtmlNode("b", "This is Bold")
+		spanNode := ssg.CreateHtmlNode("span", "", []*ssg.HtmlNode{bNode}, nil)
+		divNode := ssg.CreateHtmlNode("div", "", []*ssg.HtmlNode{spanNode}, nil)
+		got := divNode.HtmlString()
+		expected := `<div><span><b>This is Bold</b></span></div>`
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("can render html nodes with attributes", func(t *testing.T) {
+		aNode := ssg.CreateHtmlNode("a", "google", nil, map[string]string{"href": "google.com"})
+		spanNode := ssg.CreateHtmlNode("span", "", []*ssg.HtmlNode{aNode}, nil)
+		divNode := ssg.CreateHtmlNode("div", "", []*ssg.HtmlNode{spanNode}, nil)
+		got := divNode.HtmlString()
+		expected := `<div><span><a href="google.com">google</a></span></div>`
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
 }

@@ -74,7 +74,7 @@ func (n *HtmlNode) createOpeningTagString() string {
 		return fmt.Sprintf("<%s>", n.Tag)
 	}
 
-	return fmt.Sprintf("<%s %s>", n.Tag, attrs)
+	return fmt.Sprintf("<%s%s>", n.Tag, attrs)
 }
 
 func (n *HtmlNode) createClosingTagString() string {

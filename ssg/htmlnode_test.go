@@ -42,3 +42,52 @@ func TestPropsToHtml(t *testing.T) {
 		}
 	})
 }
+
+func TestHtmlString(t *testing.T) {
+	t.Run("can render leaf node with no attributes", func(t *testing.T) {
+		node := ssg.LeafHtmlNode("p", "Hello World")
+		htmlString := node.HtmlString()
+		expected := "<p>Hello World</p>"
+		if expected != htmlString {
+			t.Errorf("expected %q, got %q", expected, htmlString)
+		}
+	})
+
+	t.Run("can render leaf node with attributes", func(t *testing.T) {
+		props := map[string]string{
+			"href":   "https://google.com",
+			"target": "_blank",
+		}
+		node := ssg.CreateHtmlNode("a", "", nil, props)
+
+		got := node.HtmlString()
+		for attr, val := range node.Props {
+			expected := fmt.Sprintf(` %s="%s"`, attr, val)
+			if !strings.Contains(got, expected) {
+				t.Errorf("output %q missing attribute %q", got, expected)
+			}
+		}
+		if !strings.Contains(got, "<a") {
+			t.Errorf("output %q has wrong tag - expected %q", got, "<a")
+		}
+	})
+
+	t.Run("can render just text html nodes", func(t *testing.T) {
+		node := ssg.LeafHtmlNode("", "this is my text")
+		expected := "this is my text"
+		if got := node.HtmlString(); got != expected {
+			t.Errorf("expected %q, got %q", "this is my text", got)
+		}
+	})
+
+	t.Run("can render multiple html nodes", func(t *testing.T) {
+		textNode := ssg.LeafHtmlNode("", "Hello World")
+		bNode := ssg.LeafHtmlNode("b", "This is Bold")
+		block := ssg.CreateHtmlNode("p", "", []*ssg.HtmlNode{textNode, bNode}, nil)
+		got := block.HtmlString()
+		expected := `<p>Hello World<b>This is Bold</b></p>`
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+}

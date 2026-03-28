@@ -19,16 +19,42 @@ type TextNode struct {
 	Url      string
 }
 
-func CreateUrlTextNode(text string, textType TextType, url string) *TextNode {
+// Creates a TextNode that is just generic text
+func CreateTextNode(text string) *TextNode {
+	return createTextNode(text, TT_TEXT, "")
+}
+
+// / Creates a TextNode that has italic text
+func CreateItalicTextNode(text string) *TextNode {
+	return createTextNode(text, TT_ITALIC, "")
+}
+
+// / Creates a TextNode that has bold text
+func CreateBoldTextNode(text string) *TextNode {
+	return createTextNode(text, TT_BOLD, "")
+}
+
+// / Creates a TextNode that is for code text
+func CreateCodeTextNode(text string) *TextNode {
+	return createTextNode(text, TT_CODE, "")
+}
+
+// Creates a TextNode that is for links
+func CreateLinkTextNode(text, url string) *TextNode {
+	return createTextNode(text, TT_LINK, url)
+}
+
+// Creates a TextNode that is for images
+func CreateImageTextNode(text, imgSrc string) *TextNode {
+	return createTextNode(text, TT_IMAGE, imgSrc)
+}
+
+func createTextNode(text string, textType TextType, url string) *TextNode {
 	return &TextNode{
 		Text:     text,
 		TextType: textType,
 		Url:      url,
 	}
-}
-
-func CreateTextNode(text string, textType TextType) *TextNode {
-	return CreateUrlTextNode(text, textType, "")
 }
 
 func (t *TextNode) Equals(other *TextNode) bool {

@@ -21,21 +21,21 @@ func TestTextNodeEquals(t *testing.T) {
 	}
 
 	t.Run("identical nodes are equal", func(t *testing.T) {
-		node := ssg.CreateTextNode("This is a text node", ssg.TT_BOLD)
-		node2 := ssg.CreateTextNode("This is a text node", ssg.TT_BOLD)
+		node := ssg.CreateTextNode("This is a text node")
+		node2 := ssg.CreateTextNode("This is a text node")
 		assertEqualsFunc(t, node, node2, true)
 	})
 
 	t.Run("different text are not equal", func(t *testing.T) {
-		node := ssg.CreateTextNode("This is a text node", ssg.TT_BOLD)
-		node2 := ssg.CreateTextNode("This is also a text node", ssg.TT_BOLD)
+		node := ssg.CreateTextNode("This is a text node")
+		node2 := ssg.CreateTextNode("This is also a text node")
 
 		assertEqualsFunc(t, node, node2, false)
 	})
 
 	t.Run("different text types are not equal", func(t *testing.T) {
-		node := ssg.CreateTextNode("This is a text node", ssg.TT_BOLD)
-		node2 := ssg.CreateTextNode("This is also a text node", ssg.TT_ITALIC)
+		node := ssg.CreateTextNode("This is a text node")
+		node2 := ssg.CreateItalicTextNode("This is a text node")
 
 		assertEqualsFunc(t, node, node2, false)
 	})

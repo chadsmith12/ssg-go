@@ -40,3 +40,11 @@ func TestTextNodeEquals(t *testing.T) {
 		assertEqualsFunc(t, node, node2, false)
 	})
 }
+
+func TestTextNodeDeliminator(t *testing.T) {
+	node := ssg.CreateTextNode("This text is a `code block` word")
+	nodes := node.SplitNodeDeliminator("`", ssg.TT_CODE)
+	if len(nodes) != 3 {
+		t.Errorf("len(nodes) wasn't %d, got %d", 3, len(nodes))
+	}
+}

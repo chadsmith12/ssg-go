@@ -1,6 +1,9 @@
 package ssg
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type TextType string
 
@@ -87,4 +90,52 @@ func (t *TextNode) HtmlNode() *HtmlNode {
 	default:
 		return LeafHtmlNode("", t.Text)
 	}
+}
+
+func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) []*TextNode {
+	if t.TextType != TT_TEXT {
+		return []*TextNode{t}
+	}
+
+	/**
+	 * Loop through the text in the node one-by-one
+		* start in search mode
+		* if didn't find deliminator add char to builder
+		* if found deliminator, skip deliminator length -1 (ie: `->1-1 =0, **->2-1=1)
+		* if found deliminator, write to a new TextNode, add it, skip, continue on
+		* in found mode:
+		* if not deliminator add char to deliminator builder
+		* if found deliminator, skip deliminator length -1
+	*/
+
+	nodes := make([]*TextNode, 0, 5)
+	textBuilder := strings.Builder{}
+	deliminatorBuilder := strings.Builder{}
+	found := false
+	for i := 0; i < len(t.Text); i++ {
+		if t.Text[i] != deliminator[0] {
+			if !found {
+				textBuilder.WriteByte(t.Text[i])
+			} else {
+				deliminatorBuilder.WriteByte(t.Text[i])
+			}
+		} else {
+			if !found {
+				nodes = append(nodes, CreateTextNode(textBuilder.String()))
+				i += len(deliminator) - 1
+				textBuilder.Reset()
+			} else {
+				nodes = append(nodes, createTextNode(deliminatorBuilder.String(), textType, ""))
+				i += len(deliminator) - 1
+				deliminatorBuilder.Reset()
+			}
+			found = !found
+		}
+	}
+
+	// if we were in found mode we should probably throw an error as we didn't close the deliminator
+	// otherwise write out the remaining text
+
+	nodes = append(nodes, CreateTextNode(textBuilder.String()))
+	return nodes
 }

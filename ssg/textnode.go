@@ -1,9 +1,12 @@
 package ssg
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
+
+var NoEndingDeliminatorErr = errors.New("ending deliminator was not found")
 
 type TextType string
 
@@ -92,28 +95,17 @@ func (t *TextNode) HtmlNode() *HtmlNode {
 	}
 }
 
-func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) []*TextNode {
+func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) ([]*TextNode, error) {
 	if t.TextType != TT_TEXT {
-		return []*TextNode{t}
+		return []*TextNode{t}, nil
 	}
-
-	/**
-	 * Loop through the text in the node one-by-one
-		* start in search mode
-		* if didn't find deliminator add char to builder
-		* if found deliminator, skip deliminator length -1 (ie: `->1-1 =0, **->2-1=1)
-		* if found deliminator, write to a new TextNode, add it, skip, continue on
-		* in found mode:
-		* if not deliminator add char to deliminator builder
-		* if found deliminator, skip deliminator length -1
-	*/
 
 	nodes := make([]*TextNode, 0, 5)
 	textBuilder := strings.Builder{}
 	deliminatorBuilder := strings.Builder{}
 	found := false
 	for i := 0; i < len(t.Text); i++ {
-		if t.Text[i] != deliminator[0] {
+		if !strings.HasPrefix(t.Text[i:], deliminator) {
 			if !found {
 				textBuilder.WriteByte(t.Text[i])
 			} else {
@@ -136,6 +128,9 @@ func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) [
 	// if we were in found mode we should probably throw an error as we didn't close the deliminator
 	// otherwise write out the remaining text
 
+	if found {
+		return []*TextNode{}, NoEndingDeliminatorErr
+	}
 	nodes = append(nodes, CreateTextNode(textBuilder.String()))
-	return nodes
+	return nodes, nil
 }

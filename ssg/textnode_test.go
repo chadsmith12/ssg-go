@@ -42,9 +42,66 @@ func TestTextNodeEquals(t *testing.T) {
 }
 
 func TestTextNodeDeliminator(t *testing.T) {
-	node := ssg.CreateTextNode("This text is a `code block` word")
-	nodes := node.SplitNodeDeliminator("`", ssg.TT_CODE)
-	if len(nodes) != 3 {
-		t.Errorf("len(nodes) wasn't %d, got %d", 3, len(nodes))
+	assertNodesEqualsFunc := func(t *testing.T, expected, got []*ssg.TextNode) {
+		if len(expected) != len(got) {
+			t.Errorf("len(nodes) wasn't %d, got %d", len(expected), len(got))
+		}
+		for i, node := range got {
+			if !expected[i].Equals(node) {
+				t.Errorf("node[%d] != expected[%d] wanted: %v - got %v",
+					i, i, expected[i].String(), node.String())
+			}
+		}
 	}
+
+	t.Run("can create text nodes from single code block", func(t *testing.T) {
+		node := ssg.CreateTextNode("This text is a `code block` word")
+		nodes, err := node.SplitNodeDeliminator("`", ssg.TT_CODE)
+		if err != nil {
+			t.Errorf("err was not nil, got %v", err)
+		}
+		expected := []*ssg.TextNode{
+			ssg.CreateTextNode("This text is a "),
+			ssg.CreateCodeTextNode("code block"),
+			ssg.CreateTextNode(" word"),
+		}
+		assertNodesEqualsFunc(t, expected, nodes)
+	})
+
+	t.Run("can create text nodes from bold block", func(t *testing.T) {
+		node := ssg.CreateTextNode("This text is a **bold block** word")
+		nodes, err := node.SplitNodeDeliminator("**", ssg.TT_BOLD)
+		if err != nil {
+			t.Errorf("err was not nil, got %v", err)
+		}
+		expected := []*ssg.TextNode{
+			ssg.CreateTextNode("This text is a "),
+			ssg.CreateBoldTextNode("bold block"),
+			ssg.CreateTextNode(" word"),
+		}
+		assertNodesEqualsFunc(t, expected, nodes)
+	})
+
+	t.Run("can create text nodes from italic block", func(t *testing.T) {
+		node := ssg.CreateTextNode("This text is a _italic block_ word")
+		nodes, err := node.SplitNodeDeliminator("_", ssg.TT_ITALIC)
+		if err != nil {
+			t.Errorf("err was not nil, got %v", err)
+		}
+
+		expected := []*ssg.TextNode{
+			ssg.CreateTextNode("This text is a "),
+			ssg.CreateItalicTextNode("italic block"),
+			ssg.CreateTextNode(" word"),
+		}
+		assertNodesEqualsFunc(t, expected, nodes)
+	})
+
+	t.Run("will return error with no ending deliminator", func(t *testing.T) {
+		node := ssg.CreateTextNode("This text is a _italic block word")
+		_, err := node.SplitNodeDeliminator("_", ssg.TT_ITALIC)
+		if err == nil {
+			t.Error("err was nil, expected NoEndingDeliminatorErr")
+		}
+	})
 }

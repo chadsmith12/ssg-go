@@ -134,3 +134,30 @@ func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) (
 	nodes = append(nodes, CreateTextNode(textBuilder.String()))
 	return nodes, nil
 }
+
+func (t *TextNode) SplitNodeLinks() []*TextNode {
+	if t.TextType != TT_TEXT {
+		return []*TextNode{}
+	}
+
+	links := ExtractMarkdownLinks(t.Text)
+	if len(links) == 0 {
+		return []*TextNode{t}
+	}
+
+	textNodes := make([]*TextNode, 0, 5)
+	// go through all the links
+	textToCut := t.Text
+	for _, link := range links {
+		rawText := fmt.Sprintf("[%s](%s)", link.Text, link.Url)
+		before, after, _ := strings.Cut(textToCut, rawText)
+		textNodes = append(textNodes, CreateTextNode(before))
+		textNodes = append(textNodes, CreateLinkTextNode(link.Text, link.Url))
+		textToCut = after
+	}
+	if textToCut != "" {
+		textNodes = append(textNodes, CreateTextNode(textToCut))
+	}
+
+	return textNodes
+}

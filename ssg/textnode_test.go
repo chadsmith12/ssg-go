@@ -6,6 +6,17 @@ import (
 	"github.com/chadsmith12/ssg-go/ssg"
 )
 
+func assertNodesEqualsFunc(t *testing.T, expected, got []*ssg.TextNode) {
+	if len(expected) != len(got) {
+		t.Errorf("len(nodes) wasn't %d, got %d", len(expected), len(got))
+	}
+	for i, node := range got {
+		if !expected[i].Equals(node) {
+			t.Errorf("node[%d] != expected[%d] wanted: %v - got %v",
+				i, i, expected[i].String(), node.String())
+		}
+	}
+}
 func TestTextNodeEquals(t *testing.T) {
 	assertEqualsFunc := func(t *testing.T, a, b *ssg.TextNode, want bool) {
 		t.Helper()
@@ -42,17 +53,6 @@ func TestTextNodeEquals(t *testing.T) {
 }
 
 func TestTextNodeDeliminator(t *testing.T) {
-	assertNodesEqualsFunc := func(t *testing.T, expected, got []*ssg.TextNode) {
-		if len(expected) != len(got) {
-			t.Errorf("len(nodes) wasn't %d, got %d", len(expected), len(got))
-		}
-		for i, node := range got {
-			if !expected[i].Equals(node) {
-				t.Errorf("node[%d] != expected[%d] wanted: %v - got %v",
-					i, i, expected[i].String(), node.String())
-			}
-		}
-	}
 
 	t.Run("can create text nodes from single code block", func(t *testing.T) {
 		node := ssg.CreateTextNode("This text is a `code block` word")
@@ -104,4 +104,18 @@ func TestTextNodeDeliminator(t *testing.T) {
 			t.Error("err was nil, expected NoEndingDeliminatorErr")
 		}
 	})
+}
+
+func TestLinkNodeSplitting(t *testing.T) {
+	node := ssg.CreateTextNode("this is my text node with a [link](https://google.com) stuff after and another [link](https://google.com) with text ending")
+	foundNodes := node.SplitNodeLinks()
+	expectedNodes := []*ssg.TextNode{
+		ssg.CreateTextNode("this is my text node with a "),
+		ssg.CreateLinkTextNode("link", "https://google.com"),
+		ssg.CreateTextNode(" stuff after and another "),
+		ssg.CreateLinkTextNode("link", "https://google.com"),
+		ssg.CreateTextNode(" with text ending"),
+	}
+
+	assertNodesEqualsFunc(t, expectedNodes, foundNodes)
 }

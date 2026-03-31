@@ -7,6 +7,7 @@ import (
 )
 
 func assertNodesEqualsFunc(t *testing.T, expected, got []*ssg.TextNode) {
+	t.Helper()
 	if len(expected) != len(got) {
 		t.Errorf("len(nodes) wasn't %d, got %d", len(expected), len(got))
 	}
@@ -118,4 +119,39 @@ func TestLinkNodeSplitting(t *testing.T) {
 	}
 
 	assertNodesEqualsFunc(t, expectedNodes, foundNodes)
+}
+
+func TestImageNodeSplitting(t *testing.T) {
+	node := ssg.CreateTextNode("this is my text node with a ![link](https://google.com) stuff after and another ![link](https://google.com) with text ending")
+	foundNodes := node.SplitNodeImages()
+	expectedNodes := []*ssg.TextNode{
+		ssg.CreateTextNode("this is my text node with a "),
+		ssg.CreateImageTextNode("link", "https://google.com"),
+		ssg.CreateTextNode(" stuff after and another "),
+		ssg.CreateImageTextNode("link", "https://google.com"),
+		ssg.CreateTextNode(" with text ending"),
+	}
+
+	assertNodesEqualsFunc(t, expectedNodes, foundNodes)
+}
+
+func TestExtractNodesFromMarkdownString(t *testing.T) {
+	t.Run("can extract all from valid markdown string", func(t *testing.T) {
+		test := "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+		nodes := ssg.ExtractTextNodes(test)
+		expected := []*ssg.TextNode{
+			ssg.CreateTextNode("This is "),
+			ssg.CreateBoldTextNode("text"),
+			ssg.CreateTextNode(" with an "),
+			ssg.CreateItalicTextNode("italic"),
+			ssg.CreateTextNode(" word and a "),
+			ssg.CreateCodeTextNode("code block"),
+			ssg.CreateTextNode(" and an "),
+			ssg.CreateImageTextNode("obi wan image", "https://i.imgur.com/fJRm4Vk.jpeg"),
+			ssg.CreateTextNode(" and a "),
+			ssg.CreateLinkTextNode("link", "https://boot.dev"),
+		}
+
+		assertNodesEqualsFunc(t, expected, nodes)
+	})
 }

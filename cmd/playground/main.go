@@ -1,15 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"strings"
+	"github.com/chadsmith12/ssg-go/ssg"
 )
 
 func main() {
-	test := "This is a **test string"
-
-	found := strings.Split(test, "**")
-	for i, string := range found {
-		fmt.Printf("%d: %s\n", i+1, string)
-	}
+	test := "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+	ssg.ExtractTextNodes(test)
 }

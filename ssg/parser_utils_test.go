@@ -19,13 +19,13 @@ func TextExtractMarkdownImages(t *testing.T) {
 	}
 
 	t.Run("can find single markdown image", func(t *testing.T) {
-		images := ssg.ExtractMarkDownImages("this is my ![alt text](/image.png)")
+		images := ssg.ExtractMarkdownImages("this is my ![alt text](/image.png)")
 		expected := []ssg.MarkdownImage{{AltText: "alt text", ImageUrl: "/image.png"}}
 		assertFoundMarkDownImages(t, expected, images)
 	})
 
 	t.Run("can find multiple markdown images", func(t *testing.T) {
-		images := ssg.ExtractMarkDownImages("this is my ![alt text](/image.png) and ![alt text](/image.png)")
+		images := ssg.ExtractMarkdownImages("this is my ![alt text](/image.png) and ![alt text](/image.png)")
 		expected := []ssg.MarkdownImage{
 			{AltText: "alt text", ImageUrl: "/image.png"},
 			{AltText: "alt text", ImageUrl: "/image.png"},
@@ -34,19 +34,19 @@ func TextExtractMarkdownImages(t *testing.T) {
 	})
 
 	t.Run("finds no markdown images with just text", func(t *testing.T) {
-		images := ssg.ExtractMarkDownImages("this is my text with no images")
+		images := ssg.ExtractMarkdownImages("this is my text with no images")
 		expected := []ssg.MarkdownImage{}
 		assertFoundMarkDownImages(t, expected, images)
 	})
 
 	t.Run("finds no markdown images with invalid markdown", func(t *testing.T) {
-		images := ssg.ExtractMarkDownImages("this is my text with ![alt text] not markdown ()")
+		images := ssg.ExtractMarkdownImages("this is my text with ![alt text] not markdown ()")
 		expected := []ssg.MarkdownImage{}
 		assertFoundMarkDownImages(t, expected, images)
 	})
 
 	t.Run("finds no markdown images with invalid markdown - 2", func(t *testing.T) {
-		images := ssg.ExtractMarkDownImages("this is my text with ![alt text](testing....]")
+		images := ssg.ExtractMarkdownImages("this is my text with ![alt text](testing....]")
 		expected := []ssg.MarkdownImage{}
 		assertFoundMarkDownImages(t, expected, images)
 	})

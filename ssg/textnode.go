@@ -137,7 +137,7 @@ func (t *TextNode) SplitNodeDeliminator(deliminator string, textType TextType) (
 
 func (t *TextNode) SplitNodeLinks() []*TextNode {
 	if t.TextType != TT_TEXT {
-		return []*TextNode{}
+		return []*TextNode{t}
 	}
 
 	links := ExtractMarkdownLinks(t.Text)
@@ -160,4 +160,72 @@ func (t *TextNode) SplitNodeLinks() []*TextNode {
 	}
 
 	return textNodes
+}
+
+func (t *TextNode) SplitNodeImages() []*TextNode {
+	if t.TextType != TT_TEXT {
+		return []*TextNode{t}
+	}
+
+	images := ExtractMarkdownImages(t.Text)
+	if len(images) == 0 {
+		return []*TextNode{t}
+	}
+
+	textNodes := make([]*TextNode, 0, 5)
+	textToCut := t.Text
+	for _, link := range images {
+		rawText := fmt.Sprintf("![%s](%s)", link.AltText, link.ImageUrl)
+		before, after, _ := strings.Cut(textToCut, rawText)
+		textNodes = append(textNodes, CreateTextNode(before))
+		textNodes = append(textNodes, CreateImageTextNode(link.AltText, link.ImageUrl))
+		textToCut = after
+	}
+	if textToCut != "" {
+		textNodes = append(textNodes, CreateTextNode(textToCut))
+	}
+
+	return textNodes
+}
+
+func SplitNodesDeliminator(oldNodes []*TextNode, deliminator string, textType TextType) []*TextNode {
+	nodes := make([]*TextNode, 0, 5)
+
+	for _, node := range oldNodes {
+		created, _ := node.SplitNodeDeliminator(deliminator, textType)
+		nodes = append(nodes, created...)
+	}
+
+	return nodes
+}
+
+func SplitNodesUrls(oldNodes []*TextNode) []*TextNode {
+	nodes := make([]*TextNode, 0, 5)
+
+	for _, node := range oldNodes {
+		nodes = append(nodes, node.SplitNodeLinks()...)
+	}
+
+	return nodes
+}
+
+func SplitNodesImages(oldNodes []*TextNode) []*TextNode {
+	nodes := make([]*TextNode, 0, 5)
+
+	for _, node := range oldNodes {
+		nodes = append(nodes, node.SplitNodeImages()...)
+	}
+
+	return nodes
+}
+
+func ExtractTextNodes(text string) []*TextNode {
+	textNode := CreateTextNode(text)
+	newNodes, _ := textNode.SplitNodeDeliminator("`", TT_CODE)
+	newNodes = SplitNodesDeliminator(newNodes, "**", TT_BOLD)
+	newNodes = SplitNodesDeliminator(newNodes, "_", TT_ITALIC)
+	newNodes = SplitNodesImages(newNodes)
+	newNodes = SplitNodesUrls(newNodes)
+
+	return newNodes
 }

@@ -95,7 +95,7 @@ func extractMarkdownReference(text string, openToken string) []markdownReference
 	return refsFound
 }
 
-func ExtractMarkDownImages(text string) []MarkdownImage {
+func ExtractMarkdownImages(text string) []MarkdownImage {
 	references := extractMarkdownReference(text, "![")
 	imagesFound := make([]MarkdownImage, len(references))
 	for i, reference := range references {

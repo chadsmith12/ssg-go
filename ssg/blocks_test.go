@@ -81,4 +81,12 @@ func TestBlockToBlockType(t *testing.T) {
 			t.Errorf("%s should be a paragraph - got %s", heading, blockType)
 		}
 	})
+
+	t.Run("can detect multi-line code block", func(t *testing.T) {
+		block := "```\nprint('hello world')\n```"
+		blockType := ssg.BlockToBlockType(block)
+		if blockType != ssg.BT_CODE {
+			t.Errorf("%s should be a code block - got %s", block, blockType)
+		}
+	})
 }

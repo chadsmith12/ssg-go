@@ -1,10 +1,22 @@
 package ssg_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/chadsmith12/ssg-go/ssg"
 )
+
+func makeHeading(level int, text string) string {
+	builder := strings.Builder{}
+	for range level {
+		builder.WriteByte('#')
+	}
+	builder.WriteByte(' ')
+	builder.WriteString(text)
+
+	return builder.String()
+}
 
 func assertBlocksEqual(t *testing.T, expected, got []string) {
 	t.Helper()
@@ -40,5 +52,33 @@ This is a paragraph of text. It has some **bold** and _italic_ words inside of i
 		}
 
 		assertBlocksEqual(t, expected, blocks)
+	})
+}
+
+func TestBlockToBlockType(t *testing.T) {
+	t.Run("can detect headings 1-6", func(t *testing.T) {
+		for i := range 6 {
+			heading := makeHeading(i+1, "hello world")
+			expected := ssg.BT_HEADING
+			if ssg.BlockToBlockType(heading) != expected {
+				t.Errorf("wanted %s - got %s", expected, ssg.BlockToBlockType(heading))
+			}
+		}
+	})
+
+	t.Run("headings must have space after #", func(t *testing.T) {
+		heading := "##Hello World"
+		blockType := ssg.BlockToBlockType(heading)
+		if blockType == ssg.BT_HEADING {
+			t.Errorf("%s should not be a heading - got %s", heading, blockType)
+		}
+	})
+
+	t.Run("empty text should return paragraph", func(t *testing.T) {
+		heading := ""
+		blockType := ssg.BlockToBlockType(heading)
+		if blockType != ssg.BT_PARAGRAPH {
+			t.Errorf("%s should be a paragraph - got %s", heading, blockType)
+		}
 	})
 }

@@ -32,6 +32,20 @@ func LeafHtmlNode(tag, value string) *HtmlNode {
 	return CreateHtmlNode(tag, value, []*HtmlNode{}, map[string]string{})
 }
 
+func FromMarkdown(text string) *HtmlNode {
+	parent := DefaultHtmlNode()
+	parent.Tag = "div"
+
+	blocks := MarkdownToBlocks(text)
+	for _, block := range blocks {
+		blockType := BlockToBlockType(block)
+		child := blockType.HtmlNode(block)
+		parent.Children = append(parent.Children, child)
+	}
+
+	return parent
+}
+
 // Attributes returns the props for this HTMLNode as HTML attributes string
 func (n *HtmlNode) Attributes() string {
 	if len(n.Props) == 0 {

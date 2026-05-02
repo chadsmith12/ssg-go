@@ -113,3 +113,75 @@ func TestHtmlString(t *testing.T) {
 		}
 	})
 }
+
+func TestFromMarkdown(t *testing.T) {
+	t.Run("parses paragraph", func(t *testing.T) {
+		md := "Hello World"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><p>Hello World</p></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses heading", func(t *testing.T) {
+		md := "# Hello World"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><h1>Hello World</h1></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses multiple blocks", func(t *testing.T) {
+		md := "# Hello World\n\nParagraph here"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><h1>Hello World</h1><p>Paragraph here</p></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses code block", func(t *testing.T) {
+		md := "```\ncode here\n```"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><pre><code>code here</code></pre></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses quote block", func(t *testing.T) {
+		md := "> Quote text"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><blockquote><p>Quote text</p></blockquote></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses unordered list", func(t *testing.T) {
+		md := "- item 1\n- item 2"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><ul><li>item 1</li><li>item 2</li></ul></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+
+	t.Run("parses ordered list", func(t *testing.T) {
+		md := "1. item 1\n2. item 2"
+		node := ssg.FromMarkdown(md)
+		got := node.HtmlString()
+		expected := "<div><ol><li>item 1</li><li>item 2</li></ol></div>"
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+}
